@@ -55,4 +55,4 @@ jobs:
         run: docker build -f Dockerfile -t docker.io/naveen534/naveencicd:latest .
 
       - name: Push Docker image
-        run: docker push docker.io/naveen534/naveencicd:latest
+        run: docker build -f Dockerfile -t docker.io/naveen534/naveencicd:latest .
