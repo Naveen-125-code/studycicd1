@@ -50,3 +50,8 @@ jobs:
           dockerfile: Dockerfile.ci
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker image
+        run: docker build -f Dockerfile -t docker.io/naveen534/naveencicd:latest .
+
+      - name: Push Docker image
+        run: docker push docker.io/naveen534/naveencicd:latest
