@@ -1,0 +1,58 @@
+# This workflow builds a Java project with Maven and caches dependencies for faster runs.
+# Updated for Java 17 and fixed dependency submission permissions.
+
+name: Java CI with Maven & Docker
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# 👇 Required for dependency graph upload (fixes HTTP 403 error)
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ✅ Step 1: Checkout the code
+      - uses: actions/checkout@v4
+
+      # ✅ Step 2: Set up Java 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # ✅ Step 3: Build your project
+      # Change the path if your pom.xml is in a subfolder (e.g. backend/pom.xml)
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      # ✅ Step 4: Upload dependency graph (optional but fixed)
+      - name: Update dependency graph
+        uses: advanced-security/maven-dependency-submission-action@v3
+        if: github.event_name == 'push'
+
+      # ✅ Step 5: Build & push Docker image
+      - name: Build & push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v6
+        with:
+          image: naveen534/naveencicd
+          tags:  latest
+          registry: docker.io
+          dockerfile: Dockerfile
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: docker build -f Dockerfile -t docker.io/naveen534/naveencicd:latest .
+
+      - name: Push Docker image
+        run: docker build -f Dockerfile -t docker.io/naveen534/naveencicd:latest .
